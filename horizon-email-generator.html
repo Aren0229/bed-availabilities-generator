@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Horizon Bed Availability — Email Generator</title>
+<style>
+  :root{
+    --teal:#1a5f6e;
+    --teal-mid:#2a7d8c;
+    --teal-pale:#eaf5f3;
+    --teal-line:#aee3d8;
+    --gold:#f2c230;
+    --gold-deep:#c99a1a;
+    --gold-pale:#fdf6e3;
+    --ink:#22343a;
+    --slate:#33555c;
+    --muted:#7f9298;
+    --panel:#ffffff;
+    --bg:#f0f4f4;
+    --edge:#dbe6e6;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  header.app{
+    background:var(--teal);
+    color:#fff;
+    padding:20px 28px;
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  header.app .mark{
+    font-weight:800;
+    letter-spacing:.5px;
+    font-size:19px;
+  }
+  header.app .sub{
+    font-size:12px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:#bfe0e5;
+  }
+  .layout{
+    display:grid;
+    grid-template-columns:380px 1fr;
+    gap:0;
+    min-height:calc(100vh - 61px);
+  }
+  @media (max-width:900px){
+    .layout{grid-template-columns:1fr;}
+  }
+  /* ---- controls panel ---- */
+  .controls{
+    background:var(--panel);
+    border-right:1px solid var(--edge);
+    padding:26px 24px 40px;
+  }
+  .controls h2{
+    font-size:12px;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin:0 0 4px;
+  }
+  .controls .hint{
+    font-size:12.5px;
+    color:var(--muted);
+    margin:0 0 22px;
+    line-height:1.5;
+  }
+  .field{margin-bottom:20px;}
+  .field label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.4px;
+    color:var(--slate);
+    margin-bottom:7px;
+  }
+  .field input[type=text],
+  .field input[type=number],
+  .field textarea{
+    width:100%;
+    padding:11px 13px;
+    border:1.5px solid var(--edge);
+    border-radius:9px;
+    font-size:14px;
+    font-family:inherit;
+    color:var(--ink);
+    background:#fbfdfd;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .field input:focus,
+  .field textarea:focus{
+    outline:none;
+    border-color:var(--teal-mid);
+    box-shadow:0 0 0 3px rgba(42,125,140,.14);
+    background:#fff;
+  }
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .stepper{display:flex;align-items:stretch;gap:0;}
+  .stepper button{
+    width:42px;
+    border:1.5px solid var(--edge);
+    background:#f4f8f8;
+    color:var(--teal);
+    font-size:20px;
+    font-weight:700;
+    cursor:pointer;
+    line-height:1;
+    transition:background .12s;
+  }
+  .stepper button:hover{background:var(--teal-pale);}
+  .stepper button:active{background:var(--teal-line);}
+  .stepper button.minus{border-radius:9px 0 0 9px;border-right:none;}
+  .stepper button.plus{border-radius:0 9px 9px 0;border-left:none;}
+  .stepper input{
+    text-align:center;
+    border-radius:0;
+    -moz-appearance:textfield;
+    font-weight:700;
+    font-size:16px;
+  }
+  .stepper input::-webkit-outer-spin-button,
+  .stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  textarea{min-height:120px;resize:vertical;line-height:1.5;}
+  .divider{
+    height:1px;background:var(--edge);margin:26px 0 22px;border:0;
+  }
+  .swatch-teal,.swatch-gold{
+    display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:middle;margin-right:6px;
+  }
+  .swatch-teal{background:var(--teal-mid);}
+  .swatch-gold{background:var(--gold);}
+  /* ---- output panel ---- */
+  .output{
+    padding:26px 30px 50px;
+    overflow:auto;
+  }
+  .out-head{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:16px;flex-wrap:wrap;margin-bottom:8px;
+  }
+  .out-head h2{
+    font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:var(--teal);margin:0;
+  }
+  .tabs{display:flex;gap:6px;}
+  .tab{
+    border:1.5px solid var(--edge);
+    background:#fff;
+    color:var(--slate);
+    font-size:12.5px;
+    font-weight:700;
+    padding:7px 15px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  .tab.active{background:var(--teal);border-color:var(--teal);color:#fff;}
+  .actions{display:flex;gap:10px;margin:14px 0 18px;flex-wrap:wrap;}
+  .btn{
+    border:none;border-radius:9px;padding:11px 18px;
+    font-size:13.5px;font-weight:700;letter-spacing:.3px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;transition:transform .06s, filter .15s;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--teal);color:#fff;}
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-gold{background:var(--gold);color:#5c4708;}
+  .btn-gold:hover{filter:brightness(1.05);}
+  .btn-ghost{background:#fff;color:var(--teal);border:1.5px solid var(--edge);}
+  .btn-ghost:hover{background:var(--teal-pale);}
+  .toast{
+    display:inline-block;font-size:12.5px;font-weight:700;color:var(--teal-mid);
+    opacity:0;transition:opacity .2s;align-self:center;
+  }
+  .toast.show{opacity:1;}
+  .panel-box{
+    background:#fff;border:1px solid var(--edge);border-radius:12px;overflow:hidden;
+  }
+  #preview-frame{
+    width:100%;height:640px;border:0;display:block;background:#fff;
+  }
+  #code-view{
+    margin:0;padding:20px;font-family:'SF Mono',Menlo,Consolas,monospace;
+    font-size:12px;line-height:1.55;color:#274047;background:#f7fbfb;
+    white-space:pre;overflow:auto;max-height:640px;
+  }
+  .hidden{display:none;}
+  .note{
+    font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5;
+  }
+  .note b{color:var(--slate);}
+</style>
+</head>
+<body>
+
+<header class="app">
+  <span class="mark">Horizon Bed Availability</span>
+  <span class="sub">Email Generator</span>
+</header>
+
+<div class="layout">
+
+  <!-- ============ CONTROLS ============ -->
+  <section class="controls">
+    <h2>Inputs</h2>
+    <p class="hint">Set the numbers and copy below. The preview and code update live. Both the visible cards and the hidden Outlook preview text stay in sync.</p>
+
+    <div class="row2">
+      <div class="field">
+        <label><span class="swatch-teal"></span>Male beds</label>
+        <div class="stepper">
+          <button type="button" class="minus" data-step="male" data-dir="-1">&minus;</button>
+          <input type="number" id="male" min="0" value="6">
+          <button type="button" class="plus" data-step="male" data-dir="1">+</button>
+        </div>
+      </div>
+      <div class="field">
+        <label><span class="swatch-gold"></span>Female beds</label>
+        <div class="stepper">
+          <button type="button" class="minus" data-step="female" data-dir="-1">&minus;</button>
+          <input type="number" id="female" min="0" value="1">
+          <button type="button" class="plus" data-step="female" data-dir="1">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Facility name (preview label)</label>
+      <input type="text" id="facility" value="Horizon LA">
+    </div>
+
+    <hr class="divider">
+    <h2>Intro paragraph</h2>
+    <div class="field">
+      <textarea id="intro">Attached is our 1-page referral form. You can now fill it out electronically for added convenience. Feel free to call with any questions. To refer, send paperwork to:</textarea>
+    </div>
+
+    <hr class="divider">
+    <h2>Admissions</h2>
+    <div class="field">
+      <label>Admissions email</label>
+      <input type="text" id="admEmail" value="admissions@HorizonCenters.org">
+    </div>
+    <div class="field">
+      <label>Phone line (full text)</label>
+      <input type="text" id="admPhoneLine" value="P: 323-282-5833 - Jeff Vicente (jeffv@horizoncenters.org) Esmeralda Reyes (ereyes@horizoncenters.org)">
+    </div>
+    <div class="field">
+      <label>Fax</label>
+      <input type="text" id="admFax" value="F: 323-676-2000">
+    </div>
+
+    <hr class="divider">
+    <h2>Medical Records</h2>
+    <div class="field">
+      <label>MRR email</label>
+      <input type="text" id="mrrEmail" value="MRR@HorizonLosAngeles.org">
+    </div>
+    <div class="field">
+      <label>MRR fax</label>
+      <input type="text" id="mrrFax" value="F: 323-763-9825">
+    </div>
+
+    <hr class="divider">
+    <h2>Address &amp; site</h2>
+    <div class="field">
+      <label>Address block (one line each)</label>
+      <textarea id="address">10900 S Vermont Ave.
+10510 S Vermont Ave.
+Los Angeles, CA 90044</textarea>
+    </div>
+    <div class="field">
+      <label>Website</label>
+      <input type="text" id="website" value="www.HorizonCenters.org">
+    </div>
+
+    <hr class="divider">
+    <h2>Insurances accepted</h2>
+    <div class="field">
+      <label>One per line</label>
+      <textarea id="insurances">LA Care
+Healthnet
+Molina
+Blue Shield
+Kaiser
+Regal
+LOAs available</textarea>
+    </div>
+
+    <hr class="divider">
+    <h2>Unsubscribe line</h2>
+    <div class="field">
+      <textarea id="unsub" style="min-height:70px;">Please reply "unsubscribe" to remove yourself from Horizon LA Bed Availabilities</textarea>
+    </div>
+  </section>
+
+  <!-- ============ OUTPUT ============ -->
+  <section class="output">
+    <div class="out-head">
+      <h2>Output</h2>
+      <div class="tabs">
+        <button class="tab active" data-tab="preview">Preview</button>
+        <button class="tab" data-tab="code">HTML code</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="copyBtn">Copy HTML</button>
+      <button class="btn btn-gold" id="copyRichBtn">Copy for Outlook</button>
+      <button class="btn btn-ghost" id="downloadBtn">Download .html</button>
+      <span class="toast" id="toast">Copied!</span>
+    </div>
+
+    <div class="panel-box">
+      <iframe id="preview-frame" title="Email preview"></iframe>
+      <pre id="code-view" class="hidden"></pre>
+    </div>
+
+    <p class="note"><b>Copy for Outlook</b> puts the rendered email on your clipboard so you can paste it straight into a message body. <b>Copy HTML</b> gives you the raw source. The hidden preview spacer (10&times;) is baked in automatically.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var $ = function(id){ return document.getElementById(id); };
+  var esc = function(s){
+    return String(s)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;');
+  };
+
+  // Build the 10x hidden preheader spacer: ~130 pairs of &nbsp;&zwnj;
+  function spacer(){
+    var pair = '&nbsp;&zwnj;';
+    var out = '';
+    for(var i=0;i<130;i++){ out += pair; }
+    return out;
+  }
+
+  // Turn a "P: 323... (email@x.com) Name (email@y.com)" line into one with mailto links
+  function linkifyEmails(line){
+    // escape first, then wrap any email token in an italic mailto link
+    var safe = esc(line);
+    return safe.replace(/([A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,})/g, function(m){
+      return '<a href="mailto:'+m+'" style="color:#1a5f6e; text-decoration:underline; font-style:italic;">'+m+'</a>';
+    });
+  }
+
+  function bullets(text){
+    var lines = text.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    return lines.map(function(l){
+      return '      &bull;&nbsp; '+esc(l)+'<br>';
+    }).join('\n');
+  }
+
+  function addressBlock(text){
+    var lines = text.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    return lines.map(function(l){ return '      '+esc(l)+'<br>'; }).join('\n');
+  }
+
+  function bedWord(n){ return (String(n).trim()==='1') ? 'BED AVAILABLE' : 'BEDS AVAILABLE'; }
+
+  function buildHTML(v){
+    var maleWord = bedWord(v.male);
+    var femaleWord = bedWord(v.female);
+    var admEmailSafe = esc(v.admEmail);
+    var mrrEmailSafe = esc(v.mrrEmail);
+    var siteSafe = esc(v.website);
+    var siteHref = /^https?:\/\//i.test(v.website) ? v.website : 'https://'+v.website.replace(/^\/+/,'');
+
+    return '' +
+'<!DOCTYPE html>\n' +
+'<html>\n' +
+'<head>\n' +
+'<meta charset="utf-8">\n' +
+'<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+'<title>Horizon Bed Availability Email</title>\n' +
+'</head>\n' +
+'<body style="margin:0; padding:0; background-color:#ffffff; font-family:Arial, Helvetica, sans-serif;">\n' +
+'\n' +
+'<!-- ========== BED AVAILABILITY EMAIL — copy everything below into Outlook ========== -->\n' +
+'<table role="presentation" width="620" cellpadding="0" cellspacing="0" border="0" style="max-width:620px; width:100%;">\n' +
+'\n' +
+'  <!-- ===== PREVIEW TEXT (invisible 1px white text) ===== -->\n' +
+'  <tr>\n' +
+'    <td style="font-size:1px; line-height:1px; color:#ffffff; mso-line-height-rule:exactly;">\n' +
+'      <span style="font-size:1px; color:#ffffff;">Male - '+esc(v.male)+', Female - '+esc(v.female)+spacer()+'</span>\n' +
+'    </td>\n' +
+'  </tr>\n' +
+'\n' +
+'  <!-- ===== NUMBER CARDS ===== -->\n' +
+'  <tr>\n' +
+'    <td style="padding:0 0 24px 0;">\n' +
+'      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;">\n' +
+'        <tr>\n' +
+'          <!-- MALE card — Horizon teal -->\n' +
+'          <td width="49%" valign="top" style="background-color:#eaf5f3;">\n' +
+'            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">\n' +
+'              <tr>\n' +
+'                <td height="5" style="background-color:#1a5f6e; font-size:0; line-height:0;">&nbsp;</td>\n' +
+'              </tr>\n' +
+'              <tr>\n' +
+'                <td align="center" style="padding:22px 10px 24px 10px;">\n' +
+'                  <div style="font-size:13px; font-weight:bold; letter-spacing:4px; color:#1a5f6e; padding-bottom:6px;">MALE</div>\n' +
+'                  <div style="font-size:78px; line-height:82px; font-weight:bold; color:#2a7d8c;">'+esc(v.male)+'</div>\n' +
+'                  <div style="font-size:12px; font-weight:bold; letter-spacing:3px; color:#1a5f6e; padding-top:8px;">'+maleWord+'</div>\n' +
+'                </td>\n' +
+'              </tr>\n' +
+'            </table>\n' +
+'          </td>\n' +
+'          <td width="2%" style="font-size:0; line-height:0;">&nbsp;</td>\n' +
+'          <!-- FEMALE card — Horizon sun gold -->\n' +
+'          <td width="49%" valign="top" style="background-color:#fdf6e3;">\n' +
+'            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">\n' +
+'              <tr>\n' +
+'                <td height="5" style="background-color:#f2c230; font-size:0; line-height:0;">&nbsp;</td>\n' +
+'              </tr>\n' +
+'              <tr>\n' +
+'                <td align="center" style="padding:22px 10px 24px 10px;">\n' +
+'                  <div style="font-size:13px; font-weight:bold; letter-spacing:4px; color:#c99a1a; padding-bottom:6px;">FEMALE</div>\n' +
+'                  <div style="font-size:78px; line-height:82px; font-weight:bold; color:#f2c230;">'+esc(v.female)+'</div>\n' +
+'                  <div style="font-size:12px; font-weight:bold; letter-spacing:3px; color:#c99a1a; padding-top:8px;">'+femaleWord+'</div>\n' +
+'                </td>\n' +
+'              </tr>\n' +
+'            </table>\n' +
+'          </td>\n' +
+'        </tr>\n' +
+'      </table>\n' +
+'    </td>\n' +
+'  </tr>\n' +
+'\n' +
+'  <!-- ===== INTRO PARAGRAPH ===== -->\n' +
+'  <tr>\n' +
+'    <td style="padding:0 0 24px 0; font-size:14px; line-height:22px; color:#33555c;">\n' +
+'      '+esc(v.intro)+'\n' +
+'    </td>\n' +
+'  </tr>\n' +
+'\n' +
+'  <!-- ===== ADMISSIONS DEPARTMENT ===== -->\n' +
+'  <tr>\n' +
+'    <td style="padding:0 0 6px 0; font-size:16px; font-weight:bold; letter-spacing:1px; color:#1a5f6e;">\n' +
+'      Admissions Department\n' +
+'    </td>\n' +
+'  </tr>\n' +
+'  <tr>\n' +
+'    <td style="padding:0;">\n' +
+'      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">\n' +
+'        <tr><td height="3" style="background-color:#aee3d8; font-size:0; line-height:0;">&nbsp;</td></tr>\n' +
+'      </table>\n' +
+'    </td>\n' +
+'  </tr>\n' +
+'  <tr>\n' +
+'    <td style="padding:14px 0 24px 0; font-size:14px; line-height:24px; color:#33555c;">\n' +
+'      E: <a href="mailto:'+admEmailSafe+'" style="color:#1a5f6e; text-decoration:underline;">'+admEmailSafe+'</a><br>\n' +
+'      '+linkifyEmails(v.admPhoneLine)+'<br>\n' +
+'      '+esc(v.admFax)+'\n' +
+'    </td>\n' +
+'  </tr>\n' +
+'\n' +
+'  <!-- ===== MEDICAL RECORDS REQUEST ===== -->\n' +
+'  <tr>\n' +
+'    <td style="padding:0 0 6px 0; font-size:16px; font-weight:bold; letter-spacing:1px; color:#1a5f6e;">\n' +
+'      Medical Records Request\n' +
+'    </td>\n' +
+'  </tr>\n' +
+'  <tr>\n' +
+'    <td style="padding:0;">\n' +
+'      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">\n' +
+'        <tr><td height="3" style="background-color:#f2c230; font-size:0; line-height:0;">&nbsp;</td></tr>\n' +
+'      </table>\n' +
+'    </td>\n' +
+'  </tr>\n' +
+'  <tr>\n' +
+'    <td style="padding:14px 0 24px 0; font-size:14px; line-height:24px; color:#33555c;">\n' +
+'      E: <a href="mailto:'+mrrEmailSafe+'" style="color:#1a5f6e; text-decoration:underline;">'+mrrEmailSafe+'</a><br>\n' +
+'      '+esc(v.mrrFax)+'\n' +
+'    </td>\n' +
+'  </tr>\n' +
+'\n' +
+'  <!-- ===== ADDRESS ===== -->\n' +
+'  <tr>\n' +
+'    <td style="padding:0 0 24px 0; font-size:14px; line-height:24px; color:#33555c;">\n' +
+addressBlock(v.address)+'\n' +
+'      <a href="'+esc(siteHref)+'" target="_blank" style="color:#1a5f6e; font-weight:bold; text-decoration:underline;">'+siteSafe+'</a>\n' +
+'    </td>\n' +
+'  </tr>\n' +
+'\n' +
+'  <!-- ===== INSURANCES ACCEPTED ===== -->\n' +
+'  <tr>\n' +
+'    <td style="padding:0 0 6px 0; font-size:16px; font-weight:bold; letter-spacing:1px; color:#1a5f6e;">\n' +
+'      Insurances Accepted\n' +
+'    </td>\n' +
+'  </tr>\n' +
+'  <tr>\n' +
+'    <td style="padding:0;">\n' +
+'      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">\n' +
+'        <tr><td height="3" style="background-color:#aee3d8; font-size:0; line-height:0;">&nbsp;</td></tr>\n' +
+'      </table>\n' +
+'    </td>\n' +
+'  </tr>\n' +
+'  <tr>\n' +
+'    <td style="padding:14px 0 24px 0; font-size:14px; line-height:24px; color:#33555c;">\n' +
+bullets(v.insurances)+'\n' +
+'    </td>\n' +
+'  </tr>\n' +
+'\n' +
+'  <!-- ===== UNSUBSCRIBE ===== -->\n' +
+'  <tr>\n' +
+'    <td style="padding:8px 0 10px 0; font-size:13px; line-height:20px; color:#7a7a7a; font-style:italic;">\n' +
+'      '+esc(v.unsub)+'\n' +
+'    </td>\n' +
+'  </tr>\n' +
+'\n' +
+'</table>\n' +
+'<!-- ========== END EMAIL ========== -->\n' +
+'\n' +
+'</body>\n' +
+'</html>\n';
+  }
+
+  function readValues(){
+    return {
+      male: $('male').value.trim() || '0',
+      female: $('female').value.trim() || '0',
+      facility: $('facility').value,
+      intro: $('intro').value,
+      admEmail: $('admEmail').value.trim(),
+      admPhoneLine: $('admPhoneLine').value,
+      admFax: $('admFax').value,
+      mrrEmail: $('mrrEmail').value.trim(),
+      mrrFax: $('mrrFax').value,
+      address: $('address').value,
+      website: $('website').value.trim(),
+      insurances: $('insurances').value,
+      unsub: $('unsub').value
+    };
+  }
+
+  var currentHTML = '';
+
+  function render(){
+    var v = readValues();
+    currentHTML = buildHTML(v);
+    // preview
+    var frame = $('preview-frame');
+    var doc = frame.contentDocument || frame.contentWindow.document;
+    doc.open(); doc.write(currentHTML); doc.close();
+    // code
+    $('code-view').textContent = currentHTML;
+  }
+
+  // wire inputs
+  ['male','female','facility','intro','admEmail','admPhoneLine','admFax',
+   'mrrEmail','mrrFax','address','website','insurances','unsub'].forEach(function(id){
+    $(id).addEventListener('input', render);
+  });
+
+  // steppers
+  document.querySelectorAll('.stepper button').forEach(function(b){
+    b.addEventListener('click', function(){
+      var target = $(b.getAttribute('data-step'));
+      var dir = parseInt(b.getAttribute('data-dir'),10);
+      var n = parseInt(target.value,10); if(isNaN(n)) n = 0;
+      n = Math.max(0, n + dir);
+      target.value = n;
+      render();
+    });
+  });
+
+  // tabs
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active');});
+      t.classList.add('active');
+      var which = t.getAttribute('data-tab');
+      $('preview-frame').classList.toggle('hidden', which!=='preview');
+      $('code-view').classList.toggle('hidden', which!=='code');
+    });
+  });
+
+  // toast helper
+  var toastTimer;
+  function toast(msg){
+    var el = $('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 1600);
+  }
+
+  // copy raw HTML
+  $('copyBtn').addEventListener('click', function(){
+    navigator.clipboard.writeText(currentHTML).then(function(){
+      toast('HTML copied!');
+    }, function(){ fallbackCopy(currentHTML); toast('HTML copied!'); });
+  });
+
+  // copy rendered (rich) for pasting into Outlook body
+  $('copyRichBtn').addEventListener('click', function(){
+    try{
+      var blobHtml = new Blob([currentHTML], {type:'text/html'});
+      var blobText = new Blob([currentHTML], {type:'text/plain'});
+      var item = new ClipboardItem({'text/html':blobHtml, 'text/plain':blobText});
+      navigator.clipboard.write([item]).then(function(){
+        toast('Rich email copied!');
+      }, function(){ toast('Use Copy HTML instead'); });
+    }catch(e){
+      toast('Use Copy HTML instead');
+    }
+  });
+
+  function fallbackCopy(text){
+    var ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+  }
+
+  // download
+  $('downloadBtn').addEventListener('click', function(){
+    var v = readValues();
+    var name = 'Horizon_BedAvailability_M'+v.male+'_F'+v.female+'.html';
+    var blob = new Blob([currentHTML], {type:'text/html'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+    toast('Downloaded!');
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
