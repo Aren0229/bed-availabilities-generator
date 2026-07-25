@@ -64,17 +64,20 @@
   }
   .swatch-teal{background:var(--teal-mid);}
   .swatch-gold{background:var(--gold);}
-  .stepper{display:flex;align-items:stretch;}
+  .stepper{display:flex;align-items:stretch;width:100%;}
   .stepper button{
-    width:52px;border:1.5px solid var(--edge);background:#f4f8f8;color:var(--teal);
+    flex:0 0 52px;width:52px;min-width:52px;
+    border:1.5px solid var(--edge);background:#f4f8f8;color:var(--teal);
     font-size:24px;font-weight:700;cursor:pointer;line-height:1;transition:background .12s;
+    display:flex;align-items:center;justify-content:center;padding:0;
   }
   .stepper button:hover{background:var(--teal-pale);}
   .stepper button:active{background:var(--teal-line);}
   .stepper button.minus{border-radius:9px 0 0 9px;border-right:none;}
   .stepper button.plus{border-radius:0 9px 9px 0;border-left:none;}
   .stepper input{
-    flex:1;text-align:center;border:1.5px solid var(--edge);border-radius:0;
+    flex:1 1 auto;min-width:0;width:100%;
+    text-align:center;border:1.5px solid var(--edge);border-radius:0;
     font-weight:800;font-size:22px;color:var(--ink);background:#fbfdfd;padding:14px 0;
     -moz-appearance:textfield;font-family:inherit;
   }
