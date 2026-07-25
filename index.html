@@ -279,28 +279,40 @@
   function bulletsHTML(arr){ return arr.map(function(l){ return '      &bull;&nbsp; '+esc(l)+'<br>'; }).join('\n'); }
   function addressHTML(arr){ return arr.map(function(l){ return '      '+esc(l)+'<br>'; }).join('\n'); }
 
-  // reusable teal/gold stat card
+  // reusable teal/gold stat card — both states render to the SAME height so cards stay aligned
   function statCard(label, value, tone){
     var accent = tone==='gold' ? '#f2c230' : '#1a5f6e';
     var bg     = tone==='gold' ? '#fdf6e3' : '#eaf5f3';
     var numCol = tone==='gold' ? '#f2c230' : '#2a7d8c';
     var lblCol = tone==='gold' ? '#c99a1a' : '#1a5f6e';
-    var big, sub;
+    // fixed height for the value area keeps number vs. "Anticipated Openings" the same size
+    var VALUE_H = 90; // px — matches the 82px number line + breathing room
+    var valueArea, sub;
     if(isZero(value)){
-      big = '<div style="font-size:20px; line-height:26px; font-weight:bold; color:'+numCol+'; padding:14px 4px 0 4px;">Anticipated</div>'+
-            '<div style="font-size:20px; line-height:26px; font-weight:bold; color:'+numCol+';">Openings</div>';
+      valueArea =
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" height="'+VALUE_H+'" style="height:'+VALUE_H+'px;">'+
+          '<tr><td align="center" valign="middle" style="height:'+VALUE_H+'px;">'+
+            '<div style="font-size:22px; line-height:27px; font-weight:bold; color:'+numCol+';">Anticipated</div>'+
+            '<div style="font-size:22px; line-height:27px; font-weight:bold; color:'+numCol+';">Openings</div>'+
+          '</td></tr>'+
+        '</table>';
       sub = '<div style="font-size:12px; font-weight:bold; letter-spacing:2px; color:'+lblCol+'; padding-top:8px;">CALL FOR STATUS</div>';
     } else {
-      big = '<div style="font-size:78px; line-height:82px; font-weight:bold; color:'+numCol+';">'+esc(value)+'</div>';
+      valueArea =
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" height="'+VALUE_H+'" style="height:'+VALUE_H+'px;">'+
+          '<tr><td align="center" valign="middle" style="height:'+VALUE_H+'px;">'+
+            '<div style="font-size:78px; line-height:82px; font-weight:bold; color:'+numCol+';">'+esc(value)+'</div>'+
+          '</td></tr>'+
+        '</table>';
       sub = '<div style="font-size:12px; font-weight:bold; letter-spacing:3px; color:'+lblCol+'; padding-top:8px;">'+bedWord(value)+'</div>';
     }
     return '' +
-'            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">\n' +
+'            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" height="100%" style="height:100%;">\n' +
 '              <tr><td height="5" style="background-color:'+accent+'; font-size:0; line-height:0;">&nbsp;</td></tr>\n' +
 '              <tr>\n' +
-'                <td align="center" style="background-color:'+bg+'; padding:22px 10px 24px 10px;">\n' +
+'                <td align="center" valign="top" style="background-color:'+bg+'; padding:22px 10px 24px 10px;">\n' +
 '                  <div style="font-size:13px; font-weight:bold; letter-spacing:4px; color:'+lblCol+'; padding-bottom:6px;">'+label+'</div>\n' +
-'                  '+big+'\n' +
+'                  '+valueArea+'\n' +
 '                  '+sub+'\n' +
 '                </td>\n' +
 '              </tr>\n' +
@@ -354,11 +366,11 @@
 '    <td style="padding:0 0 24px 0;">\n' +
 '      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;">\n' +
 '        <tr>\n' +
-'          <td width="49%" valign="top">\n' +
+'          <td width="49%" valign="top" height="100%" style="height:100%;">\n' +
 statCard('MALE', maleVal, 'teal') +
 '          </td>\n' +
 '          <td width="2%" style="font-size:0; line-height:0;">&nbsp;</td>\n' +
-'          <td width="49%" valign="top">\n' +
+'          <td width="49%" valign="top" height="100%" style="height:100%;">\n' +
 statCard('FEMALE', femaleVal, 'gold') +
 '          </td>\n' +
 '        </tr>\n' +
