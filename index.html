@@ -482,10 +482,12 @@ bulletsHTML(f.insurances)+'\n' +
 '<!-- ========== BED AVAILABILITY EMAIL — '+fac+' — copy everything below into Outlook ========== -->\n' +
 '<table role="presentation" width="620" cellpadding="0" cellspacing="0" border="0" style="max-width:620px; width:100%;">\n' +
 '\n' +
-'  <!-- ===== PREVIEW TEXT (invisible 1px white text) ===== -->\n' +
+'  <!-- ===== PREVIEW TEXT (hidden preheader — stays invisible on Outlook desktop AND mobile) ===== -->\n' +
 '  <tr>\n' +
-'    <td style="font-size:1px; line-height:1px; color:#ffffff; mso-line-height-rule:exactly;">\n' +
-'      <span style="font-size:1px; color:#ffffff;">'+esc(preheader)+spacer()+'</span>\n' +
+'    <td style="padding:0; margin:0;">\n' +
+'      <div style="display:none; max-height:0; max-width:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:#ffffff; opacity:0;">\n' +
+'        '+esc(preheader)+spacer()+'\n' +
+'      </div>\n' +
 '    </td>\n' +
 '  </tr>\n' +
 '\n' +
